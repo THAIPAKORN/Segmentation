@@ -1,0 +1,538 @@
+<title>แยกหมาออกจากพื้นหลัง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#e9eeed; --surface:#ffffff; --surface-2:#f3f7f6;
+  --ink:#0f1617; --ink-soft:#39494a; --muted:#647777;
+  --rule:#ccd8d6; --rule-soft:#dde6e4;
+  --accent:#0f5f5c; --accent-soft:#d5e6e3;
+  --err:#8f4319;
+  --grid-on:#0f5f5c; --grid-off:#e3eae9;
+  --shadow:0 1px 2px rgba(15,60,58,.06), 0 8px 24px -12px rgba(15,60,58,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0b1011; --surface:#141c1d; --surface-2:#182223;
+    --ink:#e3ecea; --ink-soft:#b6c6c4; --muted:#859897;
+    --rule:#26332f; --rule-soft:#1e2a2a;
+    --accent:#5cb8ae; --accent-soft:#16302f;
+    --err:#dc9166;
+    --grid-on:#5cb8ae; --grid-off:#1e2a2a;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0b1011; --surface:#141c1d; --surface-2:#182223;
+  --ink:#e3ecea; --ink-soft:#b6c6c4; --muted:#859897;
+  --rule:#26332f; --rule-soft:#1e2a2a;
+  --accent:#5cb8ae; --accent-soft:#16302f;
+  --err:#dc9166;
+  --grid-on:#5cb8ae; --grid-off:#1e2a2a;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans Thai","Segoe UI",system-ui,sans-serif;
+  font-size:16px; line-height:1.72; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px 96px}
+.col{max-width:720px}
+h1,h2,h3,.disp{font-family:"Chakra Petch","IBM Plex Sans Thai",sans-serif; text-wrap:balance}
+p{margin:0 0 1.1em}
+a{color:var(--accent); text-underline-offset:3px}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+
+.mast{padding:64px 0 34px; border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 18px;
+}
+h1{font-size:clamp(34px,5.4vw,54px); line-height:1.12; font-weight:700; margin:0 0 18px; letter-spacing:-.01em}
+.lede{font-size:18.5px; color:var(--ink-soft); max-width:44em; margin:0}
+.mast-meta{
+  display:flex; flex-wrap:wrap; gap:8px 28px; margin-top:26px;
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted);
+}
+.mast-meta b{color:var(--ink-soft); font-weight:500}
+
+.scoreboard{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  border-bottom:1px solid var(--rule); margin-bottom:12px;
+}
+.score{padding:24px 22px 22px; border-right:1px solid var(--rule-soft)}
+.score:last-child{border-right:0}
+.score .k{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--muted); display:block; margin-bottom:6px}
+.score .v{font-family:"Chakra Petch",sans-serif; font-size:34px; font-weight:600;
+  line-height:1; font-variant-numeric:tabular-nums; display:block}
+.score .d{font-size:12.5px; color:var(--accent); margin-top:7px; display:block}
+.score .d.flat{color:var(--muted)}
+
+section{padding:56px 0 8px; border-top:1px solid var(--rule-soft)}
+section:first-of-type{border-top:0}
+.shead{display:grid; grid-template-columns:64px 1fr; gap:0 20px; align-items:start; margin-bottom:26px}
+.snum{
+  font-family:"Chakra Petch",sans-serif; font-size:13px; font-weight:600;
+  color:var(--accent); border:1px solid var(--accent); border-radius:2px;
+  padding:3px 0; text-align:center; letter-spacing:.06em; margin-top:9px;
+}
+.snum.plain{border-color:var(--rule); color:var(--muted)}
+h2{font-size:27px; font-weight:600; margin:0; letter-spacing:-.005em}
+.shead p{margin:6px 0 0; color:var(--muted); font-size:14.5px}
+.sbody{padding-left:84px}
+@media (max-width:720px){
+  .shead{grid-template-columns:1fr; gap:10px}
+  .snum{width:56px; margin-top:0}
+  .sbody{padding-left:0}
+}
+
+h3{font-size:17px; font-weight:600; margin:34px 0 12px}
+h3:first-child{margin-top:0}
+
+figure{margin:26px 0 30px}
+figure img{display:block; width:100%; height:auto; border:1px solid var(--rule);
+  border-radius:3px; background:var(--surface)}
+figcaption{font-size:13.5px; color:var(--muted); margin-top:10px; line-height:1.6}
+figcaption b{color:var(--ink-soft); font-weight:500}
+.bleed{margin-left:-84px}
+@media (max-width:720px){ .bleed{margin-left:0} }
+
+.tw{overflow-x:auto; margin:22px 0 26px; border:1px solid var(--rule); border-radius:3px}
+table{border-collapse:collapse; width:100%; font-size:13.5px; background:var(--surface)}
+th,td{padding:9px 13px; text-align:right; white-space:nowrap;
+  border-bottom:1px solid var(--rule-soft)}
+th:first-child,td:first-child{text-align:left}
+thead th{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted); font-weight:500;
+  background:var(--surface-2); border-bottom:1px solid var(--rule);
+}
+tbody td{font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+tr.best td{background:var(--accent-soft); font-weight:600}
+tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+td.pos{color:var(--accent); font-weight:500}
+td.neg{color:var(--err)}
+
+.note{
+  background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--accent);
+  border-radius:3px; padding:18px 20px; margin:24px 0; font-size:14.5px;
+}
+.note.warn{border-left-color:var(--err)}
+.note .t{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--accent); display:block; margin-bottom:8px;
+}
+.note.warn .t{color:var(--err)}
+.note p:last-child{margin-bottom:0}
+
+.formula{
+  background:var(--surface-2); border:1px solid var(--rule-soft); border-radius:3px;
+  padding:15px 18px; margin:18px 0; font-family:"IBM Plex Mono",monospace;
+  font-size:14px; color:var(--ink-soft); overflow-x:auto; white-space:nowrap;
+}
+.formula span{color:var(--accent); font-weight:500}
+
+.ses{display:flex; flex-wrap:wrap; gap:26px; margin:22px 0 8px}
+.se{text-align:center}
+.se svg{display:block; border:1px solid var(--rule); border-radius:2px; background:var(--surface)}
+.se .lab{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted);
+  margin-top:8px; letter-spacing:.04em}
+.se.sel .lab{color:var(--accent); font-weight:500}
+.se.sel svg{border-color:var(--accent); box-shadow:var(--shadow)}
+
+.steps{list-style:none; margin:22px 0; padding:0; counter-reset:st}
+.steps li{
+  counter-increment:st; position:relative; padding:0 0 18px 46px;
+  border-left:1px solid var(--rule); margin-left:13px;
+}
+.steps li:last-child{border-left-color:transparent; padding-bottom:0}
+.steps li::before{
+  content:counter(st); position:absolute; left:-13px; top:1px; width:26px; height:26px;
+  border-radius:50%; background:var(--accent); color:var(--surface);
+  font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:500;
+  display:grid; place-items:center;
+}
+.steps b{font-weight:600}
+.steps .sub{color:var(--muted); font-size:14px; display:block}
+
+.done{list-style:none; margin:18px 0; padding:0}
+.done li{
+  display:grid; grid-template-columns:26px 1fr; gap:12px; align-items:baseline;
+  padding:11px 0; border-bottom:1px solid var(--rule-soft); font-size:15px;
+}
+.done li:last-child{border-bottom:0}
+.done .m{color:var(--accent); font-family:"IBM Plex Mono",monospace; font-size:13px}
+.done .m.todo{color:var(--muted)}
+.done small{display:block; color:var(--muted); font-size:13.5px}
+
+.files{font-family:"IBM Plex Mono",monospace; font-size:12.5px; line-height:2;
+  color:var(--ink-soft); background:var(--surface); border:1px solid var(--rule);
+  border-radius:3px; padding:16px 18px; overflow-x:auto; white-space:pre; margin:20px 0}
+.files i{color:var(--muted); font-style:normal}
+
+footer{margin-top:60px; padding-top:22px; border-top:2px solid var(--ink);
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted);
+  display:flex; flex-wrap:wrap; gap:6px 26px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Digital Image Processing · Lecture 10 Workshop</p>
+  <h1>แยกหมาออกจากพื้นหลัง<br>ด้วย Morphological Processing</h1>
+  <p class="lede">ภาพหมา 1 ตัวบนพื้นหลัง 60 ภาพ ใช้วิธีง่าย ๆ เพียง 4 ขั้นตอน
+  แล้ววัดผลด้วย Confusion Matrix และ ROC Curve
+  เพื่อดูว่า Morphology ช่วยให้ผลลัพธ์ดีขึ้นแค่ไหน</p>
+  <div class="mast-meta">
+    <span>ภาพ <b>60 ภาพ พันธุ์ Scottish Terrier</b></span>
+    <span>ที่มา <b>Oxford-IIIT Pet</b></span>
+    <span>โค้ด <b>Python + OpenCV 3 ไฟล์</b></span>
+  </div>
+</header>
+
+<div class="scoreboard">
+  <div class="score"><span class="k">IoU</span><span class="v">0.608</span>
+    <span class="d">จาก 0.552 ก่อนใช้ Morphology</span></div>
+  <div class="score"><span class="k">F1-score</span><span class="v">0.756</span>
+    <span class="d">จาก 0.712</span></div>
+  <div class="score"><span class="k">Recall</span><span class="v">0.905</span>
+    <span class="d">จาก 0.752 เก็บตัวหมาได้ครบขึ้นมาก</span></div>
+  <div class="score"><span class="k">Accuracy</span><span class="v">0.788</span>
+    <span class="d flat">จาก 0.778</span></div>
+  <div class="score"><span class="k">AUC</span><span class="v">0.814</span>
+    <span class="d flat">จาก ROC curve</span></div>
+</div>
+
+<!-- ============================ 1 ============================ -->
+<section>
+  <div class="shead">
+    <div class="snum">ข้อ 1</div>
+    <div><h2>โจทย์ที่เลือก</h2>
+      <p>หาโจทย์การแบ่งส่วนวัตถุออกจากพื้นหลัง</p></div>
+  </div>
+  <div class="sbody col">
+    <p><b>ภาพหมา 1 ตัว บนพื้นหลัง</b> ให้โปรแกรมบอกว่า pixel ไหนคือตัวหมา pixel ไหนคือพื้นหลัง
+    โดยกำหนดให้</p>
+    <div class="tw">
+      <table>
+        <tbody>
+          <tr><td><b>Positive class</b></td><td style="text-align:left">ตัวหมา</td></tr>
+          <tr><td><b>Negative class</b></td><td style="text-align:left">พื้นหลัง</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>เลือกหมาพันธุ์เดียวคือ <b>Scottish Terrier</b> เพื่อให้โจทย์ชัดเจนและอธิบายง่าย
+    ภาพในชุดนี้มีหมาตัวเดียวเป็นตัวเอกของภาพ ไม่ใช่ภาพที่มีของหลายอย่างปนกัน
+    หมาพันธุ์นี้ส่วนใหญ่มีขนสีดำ จึงตัดกับพื้นหลังพอสมควร
+    ทำให้วิธีง่าย ๆ พอทำงานได้ และเห็นผลของ Morphology ชัด</p>
+    <div class="note">
+      <span class="t">ขอบเขตของงาน</span>
+      <p>ใช้เฉพาะการประมวลผลภาพแบบดั้งเดิม คือ สี, threshold และ morphology
+      ไม่ใช้ deep learning และไม่มีการเรียนรู้จาก ground truth
+      ค่าสีพื้นหลังคำนวณจากภาพนั้น ๆ เองตอนประมวลผล</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 2 ============================ -->
+<section>
+  <div class="shead">
+    <div class="snum">ข้อ 2</div>
+    <div><h2>ภาพและคำตอบที่ถูกต้อง</h2>
+      <p>อย่างน้อย 50 ภาพ พร้อม ground truth</p></div>
+  </div>
+  <div class="sbody">
+    <div class="col">
+    <p>ใช้ภาพจาก <b>Oxford-IIIT Pet Dataset</b> ซึ่งเปิดให้ใช้เพื่อการศึกษา
+    ข้อดีคือเขาทำ ground truth ระดับ pixel มาให้แล้ว เราจึงไม่ต้องนั่งระบายเอง
+    และได้คำตอบที่มีคุณภาพสม่ำเสมอ</p>
+    <p>คัดมา <b>60 ภาพ</b> (โจทย์ขออย่างน้อย 50) เฉพาะพันธุ์ Scottish Terrier
+    และเลือกเฉพาะภาพที่ตัวหมากินพื้นที่ระหว่าง 15% ถึง 70% ของภาพ
+    เพื่อให้ได้ภาพที่เป็น "หมา 1 ตัวบนพื้นหลัง" จริง ๆ ไม่ใช่ภาพที่หมาเล็กจิ๋วหรือใหญ่เต็มจอ
+    ทุกภาพย่อให้ด้านยาวสุด 400 pixel</p>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>ค่าใน ground truth</th><th>ความหมาย</th><th>ใช้เป็นอะไร</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">1</td><td>ตัวหมา</td><td class="pos">Positive class</td></tr>
+          <tr><td class="mono">2</td><td>พื้นหลัง</td><td>Negative class</td></tr>
+          <tr><td class="mono">3</td><td>แถบขอบที่กำกวม</td><td class="neg">ไม่นำมานับคะแนน</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col">
+    <div class="note warn">
+      <span class="t">เรื่องที่ต้องบอกให้ชัด</span>
+      <p>ค่า 3 คือแถบรอบตัวหมาที่คนทำ ground truth เองก็ตัดสินไม่ได้ว่าเป็นขนหรือพื้นหลัง
+      เราจึงตัดออกไม่นำมานับ ซึ่งเป็นวิธีมาตรฐาน
+      แต่แถบนี้กินพื้นที่ <b>เฉลี่ย 13.7% ของภาพ</b> (บางภาพถึง 36.6%)
+      จึงมีบางภาพที่ได้ IoU เกือบ 1.00 ไม่ใช่เพราะทายถูกเป๊ะ
+      แต่เพราะส่วนที่ทายพลาดดันไปตกอยู่ในแถบที่ไม่นับพอดี</p>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 3 ============================ -->
+<section>
+  <div class="shead">
+    <div class="snum">ข้อ 3</div>
+    <div><h2>วิธีที่ออกแบบ</h2>
+      <p>สร้าง algorithm แยกวัตถุออกจากพื้นหลัง</p></div>
+  </div>
+  <div class="sbody">
+    <div class="col">
+    <h3>ไอเดียหลัก</h3>
+    <p>แทนที่จะพยายามสอนโปรแกรมว่า "หมาหน้าตาเป็นอย่างไร" ซึ่งยากมาก
+    เรามองกลับด้าน คือให้โปรแกรมรู้ว่า <b>"พื้นหลังหน้าตาเป็นอย่างไร"</b> แทน</p>
+    <p>ขอบภาพรอบนอกเกือบทั้งหมดคือพื้นหลัง เอาสีตรงนั้นมาเฉลี่ยก็ได้สีพื้นหลังคร่าว ๆ
+    จากนั้น pixel ไหนที่สีต่างจากพื้นหลังมาก ก็น่าจะเป็นตัวหมา</p>
+
+    <ol class="steps">
+      <li><b>หาสีเฉลี่ยของขอบภาพ</b>
+        <span class="sub">ใช้ขอบรอบนอก 10% เป็นตัวอย่างของพื้นหลัง</span></li>
+      <li><b>วัดว่าแต่ละ pixel สีต่างจากพื้นหลังเท่าไร</b>
+        <span class="sub">ได้ "ภาพคะแนน" 0–255 ยิ่งสว่างยิ่งน่าจะเป็นหมา</span></li>
+      <li><b>ตัดภาพคะแนนเป็นขาว-ดำ ด้วย Otsu</b>
+        <span class="sub">Otsu หาเส้นแบ่งให้เองอัตโนมัติ ไม่ต้องตั้งค่าเอง</span></li>
+      <li><b>เก็บกวาดด้วย Morphology</b>
+        <span class="sub">ส่วนนี้คือหัวใจของโจทย์ข้อ 4</span></li>
+    </ol>
+
+    <p>วัดสีในปริภูมิ <b>CIE-Lab</b> ไม่ใช่ RGB เพราะระยะห่างใน Lab
+    ใกล้เคียงกับที่ตามนุษย์รู้สึกว่า "สีต่างกันแค่ไหน" มากกว่า
+    และเบลอภาพด้วย median filter ก่อนเพื่อลด noise</p>
+    </div>
+
+    <figure class="bleed">
+      <img src="{{STEPS}}" alt="ขั้นตอนทั้ง 5 ตั้งแต่ภาพต้นฉบับ ภาพคะแนน การตัดด้วย Otsu การเก็บกวาดด้วย morphology และคำตอบที่ถูกต้อง">
+      <figcaption><b>รูปที่ 1</b> — ขั้นตอนทั้งหมดบนภาพจริง
+      สังเกตขั้นที่ 3 ว่า Otsu ทิ้งจุดดำเล็ก ๆ ไว้กลางตัวหมา
+      ซึ่งเป็นงานที่ Morphology เข้ามาแก้พอดี</figcaption>
+    </figure>
+
+    <div class="col">
+    <div class="note">
+      <span class="t">ทำไมต้องมีภาพคะแนน ไม่ตัดขาว-ดำเลย</span>
+      <p>เพราะ ROC curve ในข้อ 5 ต้องไล่เส้นแบ่งไปทีละค่าตั้งแต่ 0 ถึง 255
+      ถ้าโปรแกรมคืนมาแค่ภาพขาว-ดำ จะไล่ threshold ไม่ได้ วาด ROC ไม่ได้</p>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 4 ============================ -->
+<section>
+  <div class="shead">
+    <div class="snum">ข้อ 4</div>
+    <div><h2>ทดลอง Morphology</h2>
+      <p>ปรับปรุงผลลัพธ์กระบวนการ Segmentation</p></div>
+  </div>
+  <div class="sbody">
+    <div class="col">
+    <p>ตามนิยามใน Lecture 10 การทำงานทั้งหมดถูกควบคุมด้วยรูปร่างของ Structuring Element</p>
+    <div class="formula">Dilation&nbsp;&nbsp; <span>I ⊕ H</span> = { z | Ĥ<sub>z</sub> ∩ I ≠ ∅ }&nbsp;&nbsp;&nbsp;&nbsp;
+      Erosion&nbsp;&nbsp; <span>I ⊖ H</span> = { z | H<sub>z</sub> ⊆ I }</div>
+    <div class="formula">Closing&nbsp;&nbsp; <span>I • H</span> = (I ⊕ H) ⊖ H&nbsp;&nbsp;
+      คือขยายก่อนแล้วค่อยหดกลับ</div>
+
+    <h3>ทำอะไรบ้าง</h3>
+    <p>ผลจาก Otsu มีปัญหา 2 อย่าง คือมี<b>รูโหว่อยู่ในตัวหมา</b>
+    (ตรงที่ขนสะท้อนแสงจนสีใกล้พื้นหลัง) และ<b>ตัวหมาขาดเป็นชิ้น ๆ</b> เราจึงทำ</p>
+    <ol class="steps">
+      <li><b>Closing</b><span class="sub">ขยายก่อนแล้วหดกลับ เชื่อมชิ้นส่วนที่ขาดให้ติดกัน</span></li>
+      <li><b>Region filling</b><span class="sub">อุดรูโหว่ที่ถูกล้อมอยู่ข้างในตัวหมา</span></li>
+    </ol>
+    <p>ไม่ใช้ Opening เพราะทดลองแล้วทำให้แย่ลง ส่วนที่บางอย่างขา หาง และหูจะโดนลบหายไป</p>
+
+    <h3>ขนาดของ Structuring Element</h3>
+    <p>ใช้ SE รูปวงรี แล้วลองหลายขนาดตั้งแต่ 5 ถึง 41 pixel</p>
+    <div class="ses">{{SEGRIDS}}</div>
+    </div>
+
+    <div class="col">
+    <div class="note">
+      <span class="t">วิธีเลือกขนาดที่ยุติธรรม</span>
+      <p>ถ้าลองทุกขนาดแล้วเลือกขนาดที่ดีที่สุดจากภาพชุดเดียวกับที่ใช้รายงานผล
+      ตัวเลขจะดูดีเกินความจริง เราจึงแบ่งภาพเป็น
+      <b>ชุดปรับค่า 30 ภาพ</b> และ <b>ชุดทดสอบ 30 ภาพ</b>
+      เลือกขนาดจากชุดปรับค่าเท่านั้น แล้วรายงานผลบนชุดทดสอบที่ไม่เคยใช้เลือก</p>
+    </div>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>ขนาด SE</th><th>IoU ชุดปรับค่า</th><th>IoU ชุดทดสอบ</th><th>หมายเหตุ</th></tr></thead>
+        <tbody>
+          <tr><td>ไม่ใช้ Morphology</td><td>0.6291</td><td>0.5825</td><td style="text-align:left">จุดตั้งต้น</td></tr>
+          <tr><td>5 × 5</td><td>0.6623</td><td>0.6067</td><td></td></tr>
+          <tr><td>9 × 9</td><td>0.6807</td><td>0.6104</td><td></td></tr>
+          <tr><td>13 × 13</td><td>0.6930</td><td>0.6132</td><td></td></tr>
+          <tr><td>17 × 17</td><td>0.7032</td><td>0.6213</td><td></td></tr>
+          <tr class="best"><td>21 × 21</td><td>0.7066</td><td>0.6197</td><td style="text-align:left">ดีที่สุดในชุดปรับค่า</td></tr>
+          <tr><td>25 × 25</td><td>0.7063</td><td>0.6131</td><td></td></tr>
+          <tr><td>31 × 31</td><td>0.7058</td><td>0.6066</td><td></td></tr>
+          <tr><td>41 × 41</td><td>0.6917</td><td>0.6013</td><td style="text-align:left">ใหญ่เกินไป เริ่มกลืนพื้นหลัง</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure class="bleed">
+      <img src="{{SESIZE}}" alt="กราฟ IoU เทียบกับขนาดของ structuring element ทั้งชุดปรับค่าและชุดทดสอบ">
+      <figcaption><b>รูปที่ 2</b> — ทั้งสองชุดให้รูปกราฟเหมือนกัน คือดีขึ้นเรื่อย ๆ
+      จนถึงราว 17–21 pixel แล้วเริ่มแย่ลง เพราะ SE ที่ใหญ่เกินไปจะขยายจนกลืนพื้นหลังเข้ามาด้วย
+      <b>ชุดทดสอบดีขึ้นจาก 0.583 เป็น 0.620</b> ยืนยันว่าไม่ได้เกิดจากการปรับค่าจนเข้าข้างตัวเอง</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================ 5 ============================ -->
+<section>
+  <div class="shead">
+    <div class="snum">ข้อ 5</div>
+    <div><h2>ผลการทดลองและการอภิปราย</h2>
+      <p>Confusion Matrix, ROC Curve และการวิเคราะห์</p></div>
+  </div>
+  <div class="sbody">
+
+    <h3 class="col">Confusion Matrix</h3>
+    <figure class="bleed">
+      <img src="{{CONFUSION}}" alt="Confusion matrix เปรียบเทียบก่อนและหลังใช้ morphology">
+      <figcaption><b>รูปที่ 3</b> — นับ pixel รวมทั้ง 60 ภาพ (6.21 ล้าน pixel ที่นำมานับ)
+      ช่องที่เปลี่ยนมากที่สุดคือ <b>False Negative ลดจาก 0.56 M เหลือ 0.21 M</b>
+      คือเดิมมองข้ามตัวหมาไปเยอะ พอทำ Morphology แล้วเก็บได้ครบขึ้นมาก</figcaption>
+    </figure>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>วิธี</th><th>Accuracy</th><th>Precision</th><th>Recall<br>(TPR)</th><th>Specificity<br>(TNR)</th><th>FPR</th><th>F1</th><th>IoU</th></tr></thead>
+        <tbody>
+          <tr><td>ไม่ใช้ Morphology</td><td>0.778</td><td><b>0.676</b></td><td>0.752</td><td><b>0.793</b></td><td><b>0.207</b></td><td>0.712</td><td>0.552</td></tr>
+          <tr class="best"><td>ใช้ Morphology</td><td>0.788</td><td>0.650</td><td><b>0.905</b></td><td>0.720</td><td>0.280</td><td><b>0.756</b></td><td><b>0.608</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col">
+    <p><b>อ่านตารางนี้อย่างไร</b> Morphology ทำให้ Recall พุ่งจาก 0.752 เป็น 0.905
+    คือเก็บตัวหมาได้เกือบครบ แต่ต้องแลกด้วย Precision ที่ลดลงเล็กน้อยจาก 0.676 เหลือ 0.650
+    เพราะการขยายภาพทำให้กินพื้นหลังรอบ ๆ เข้ามาด้วย
+    เมื่อรวมทั้งสองด้าน F1 และ IoU ดีขึ้นชัดเจน</p>
+    <p>ที่น่าสนใจคือ <b>Accuracy แทบไม่ขยับเลย</b> (0.778 → 0.788)
+    ทั้งที่ผลลัพธ์ดีขึ้นเห็น ๆ เพราะพื้นหลังมีสัดส่วนมากกว่าตัวหมา
+    ทายพื้นหลังถูกเยอะ ๆ ก็ดัน Accuracy ให้สูงได้แล้ว
+    นี่คือเหตุผลว่าทำไมงาน segmentation จึงไม่ควรดู Accuracy อย่างเดียว</p>
+    </div>
+
+    <h3 class="col">ROC Curve</h3>
+    <figure class="bleed">
+      <img src="{{ROC}}" alt="ROC curve พร้อมจุดทำงานจริงของทั้งสองแบบ">
+      <figcaption><b>รูปที่ 4</b> — ได้ AUC = 0.814 ซึ่งดีกว่าการเดาสุ่ม (0.500) พอสมควร
+      จุดสองจุดคือจุดทำงานจริง จะเห็นว่าการทำ Morphology
+      <b>เลื่อนจุดขึ้นไปทางบนขวา</b> คือเก็บหมาได้มากขึ้นแลกกับจับพื้นหลังผิดมากขึ้น</figcaption>
+    </figure>
+
+    <div class="col">
+    <div class="note warn">
+      <span class="t">ข้อสังเกตที่ควรพูดตอนนำเสนอ</span>
+      <p>ทั้งสองจุดอยู่บนเส้น ROC เส้นเดียวกัน เพราะภาพคะแนนเป็นตัวเดิม
+      Morphology ไม่ได้ทำให้ภาพคะแนนดีขึ้น แต่ทำให้ผลลัพธ์<b>ขยายตัวขึ้น</b>
+      ซึ่งมีผลคล้ายกับการลด threshold ลง</p>
+      <p>ประโยชน์จริงของมันจึงไม่ใช่แค่ตัวเลข แต่คือ<b>รูปร่างของผลลัพธ์</b>
+      คือได้ก้อนวัตถุที่เป็นชิ้นเดียวขอบเรียบ ไม่มีรูโหว่ ซึ่งเอาไปใช้งานต่อได้จริง
+      ต่างจากการลด threshold เฉย ๆ ที่ได้ผลลัพธ์เป็นจุด ๆ กระจัดกระจาย</p>
+    </div>
+    </div>
+
+    <h3 class="col">ภาพที่ทำได้ดีและภาพที่ล้มเหลว</h3>
+    <figure class="bleed">
+      <img src="{{EXAMPLES}}" alt="ตัวอย่างผลลัพธ์ 6 ภาพ สามภาพบนทำได้ดี สามภาพล่างล้มเหลว">
+      <figcaption><b>รูปที่ 5</b> — สามแถวบนคือภาพที่ทำได้ดีที่สุด ทั้งหมดเป็นหมาขนสีดำบนพื้นหลังสว่าง
+      สามแถวล่างคือภาพที่ล้มเหลว</figcaption>
+    </figure>
+
+    <div class="col">
+    <p><b>สาเหตุที่ล้มเหลว</b> ทั้งสามภาพล่างเป็น Scottish Terrier ขนสีอ่อน (สีครีม)
+    ซึ่งสีใกล้เคียงกับพื้นไม้และผนังในภาพ
+    สมมติฐานหลักของวิธีเราคือ "สีของหมาต่างจากสีพื้นหลัง" จึงพังทันที
+    ภาพคะแนนผิดตั้งแต่ต้น ตัดด้วย Otsu ออกมาก็เละ</p>
+    <p>และที่สำคัญ <b>Morphology ช่วยกรณีนี้ไม่ได้เลย</b> ยิ่งทำให้แย่ลงด้วยซ้ำ
+    เพราะมันแค่ขยายและเชื่อมสิ่งที่ผิดอยู่แล้วให้กลายเป็นก้อนใหญ่และเรียบขึ้น
+    บทเรียนคือ Morphology เป็นเครื่องมือ<b>เก็บกวาด</b> ไม่ใช่เครื่องมือ<b>แก้ผิดให้เป็นถูก</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 6 ============================ -->
+<section>
+  <div class="shead">
+    <div class="snum plain">ข้อ 6</div>
+    <div><h2>สรุปสำหรับนำเสนอ</h2>
+      <p>ประเด็นหลักและสิ่งที่ทำได้ครบตามโจทย์</p></div>
+  </div>
+  <div class="sbody col">
+    <h3>สามประเด็นที่ควรพูด</h3>
+    <ol>
+      <li><b>วิธีง่าย ๆ ก็ทำงานได้</b> — แค่เอาสีขอบภาพมาเฉลี่ยเป็นสีพื้นหลัง
+      แล้ววัดว่าแต่ละ pixel ต่างจากพื้นหลังแค่ไหน ก็ได้ AUC 0.814 แล้ว</li>
+      <li><b>Morphology ช่วยได้จริง และพิสูจน์บนภาพที่ไม่เคยใช้ปรับค่า</b> —
+      IoU ชุดทดสอบดีขึ้นจาก 0.583 เป็น 0.620 ตัวช่วยหลักคือ Closing กับ Region filling
+      ส่วน Opening ทำให้แย่ลงเพราะไปลบขา หาง และหูที่บางกว่า SE</li>
+      <li><b>Morphology เก็บกวาดได้ แต่แก้ของที่ผิดตั้งแต่ต้นไม่ได้</b> —
+      ภาพหมาขนสีอ่อนที่กลืนกับพื้นหลัง ทำ Morphology แล้วยิ่งแย่ลง
+      เพราะมันขยายส่วนที่ผิดให้ใหญ่ขึ้น</li>
+    </ol>
+
+    <h3>ครบตามโจทย์ทั้ง 6 ข้อ</h3>
+    <ul class="done">
+      <li><span class="m">[✓]</span><div>โจทย์แยกหมาออกจากพื้นหลัง
+        <small>หมา = Positive class, พื้นหลัง = Negative class</small></div></li>
+      <li><span class="m">[✓]</span><div>60 ภาพ พร้อม ground truth ระดับ pixel
+        <small>Scottish Terrier จาก Oxford-IIIT Pet</small></div></li>
+      <li><span class="m">[✓]</span><div>ออกแบบและสร้าง algorithm
+        <small>สีพื้นหลังจากขอบภาพ + ระยะห่างเชิงสีใน Lab + Otsu</small></div></li>
+      <li><span class="m">[✓]</span><div>ทดลอง Morphology
+        <small>ลอง SE 8 ขนาด แยกชุดปรับค่ากับชุดทดสอบ</small></div></li>
+      <li><span class="m">[✓]</span><div>Confusion Matrix, ROC Curve และอภิปรายผล
+        <small>พร้อมวิเคราะห์ว่า Morphology ช่วยเพราะอะไร และไม่ช่วยเมื่อไร</small></div></li>
+      <li><span class="m todo">[ ]</span><div>นำเสนออาจารย์
+        <small>ใช้หน้านี้เป็นสไลด์ได้เลย</small></div></li>
+    </ul>
+
+    <h3>ข้อจำกัดที่ควรยอมรับตอนนำเสนอ</h3>
+    <ul>
+      <li>ใช้ได้เฉพาะภาพที่สีของหมาต่างจากสีพื้นหลัง ถ้ากลืนกันจะพังทันที</li>
+      <li>ใช้แค่สีอย่างเดียว ไม่ได้ดูลวดลายหรือขอบของวัตถุเลย</li>
+      <li>สมมติว่าขอบภาพเป็นพื้นหลังเสมอ ถ้าหมาอยู่ชิดขอบภาพจะคำนวณสีพื้นหลังผิด</li>
+      <li>แถบขอบกำกวมที่ตัดออกกินพื้นที่เฉลี่ย 13.7% ตัวเลขทั้งหมดจึงดูดีกว่าความเป็นจริงอยู่บ้าง</li>
+      <li>SE ขนาด 21 เหมาะกับภาพที่ย่อเป็น 400 pixel เท่านั้น ถ้าเปลี่ยนขนาดภาพต้องปรับตาม</li>
+    </ul>
+
+    <h3>โค้ดมีแค่ 3 ไฟล์</h3>
+    <div class="files">src/<i>segment.py</i>          หัวใจของงาน อ่านไฟล์เดียวก็เข้าใจทั้งหมด
+src/<i>1_prepare_data.py</i>   เตรียมภาพ 60 ภาพ พร้อมคำตอบที่ถูกต้อง
+src/<i>2_run_all.py</i>        รันทุกภาพ วัดผล และวาดรูปทั้งหมด</div>
+    <p style="font-size:14px;color:var(--muted)">
+    ตารางตัวเลขอยู่ใน <code>results/tables/</code> และรูปอยู่ใน <code>results/figures/</code>
+    เปลี่ยนพันธุ์หมาได้โดยแก้ตัวแปร <code>BREED</code> บรรทัดเดียวใน <code>1_prepare_data.py</code></p>
+  </div>
+</section>
+
+<footer>
+  <span>Digital Image Processing — Lecture 10 Workshop</span>
+  <span>Oxford-IIIT Pet Dataset · Parkhi et al., CVPR 2012</span>
+  <span>Python · OpenCV · matplotlib</span>
+</footer>
+
+</div>
